@@ -23,4 +23,14 @@ class ServiceField extends Model
     {
         return $this->belongsTo(Service::class);
     }
+
+    public function tasks()
+    {
+        return $this->belongsToMany(Task::class)->withTimestamps();
+    }
+
+    public function briefings()
+    {
+        return $this->hasMany(Briefing::class);
+    }
 }

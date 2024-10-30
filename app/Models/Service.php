@@ -15,4 +15,9 @@ class Service extends Model
     {
         return $this->hasMany(ServiceField::class);
     }
+
+    public function tasks()
+    {
+        return $this->belongsToMany(Task::class)->withTimestamps();
+    }
 }

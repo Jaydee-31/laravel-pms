@@ -44,4 +44,14 @@ class Task extends Model
     {
         return $this->belongsTo(Task::class, 'parent_task_id');
     }
+
+    public function services()
+    {
+        return $this->belongsToMany(Service::class)->withTimestamps();
+    }
+
+    public function briefings()
+    {
+        return $this->hasMany(Briefing::class);
+    }
 }

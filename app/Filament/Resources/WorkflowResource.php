@@ -58,7 +58,7 @@ class WorkflowResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\StatusesRelationManager::make()
         ];
     }
 

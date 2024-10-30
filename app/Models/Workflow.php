@@ -14,7 +14,7 @@ class Workflow extends Model
     // Define the relationship to WorkflowStatuses
     public function statuses()
     {
-        return $this->hasMany(Workflow::class);
+        return $this->hasMany(Status::class);
     }
 
     // Define the relationship to Tasks

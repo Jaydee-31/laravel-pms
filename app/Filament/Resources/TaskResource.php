@@ -4,6 +4,8 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\TaskResource\Pages;
 use App\Filament\Resources\TaskResource\RelationManagers;
+use App\Models\Service;
+use App\Models\ServiceField;
 use App\Models\Task;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -23,6 +25,18 @@ class TaskResource extends Resource
     {
         return $form
             ->schema([
+                Forms\Components\Select::make('service_id')
+                    ->label('Service')
+                    ->options(Service::all()->pluck('name', 'id'))
+                    ->reactive()
+                    ->afterStateUpdated(fn (callable $set) => $set('serviceFields', [])),
+
+                Forms\Components\Fieldset::make('Service Details')
+                    ->statePath('serviceFields')
+                    ->schema(fn (callable $get) =>
+                    static::getServiceFieldsSchema($get('service_id'))
+                    ),
+
                 Forms\Components\TextInput::make('parent_task_id')
                     ->numeric(),
                 Forms\Components\TextInput::make('workflow_id')
@@ -37,7 +51,12 @@ class TaskResource extends Resource
                 Forms\Components\Textarea::make('description')
                     ->required()
                     ->columnSpanFull(),
-                Forms\Components\TextInput::make('priority')
+                Forms\Components\Select::make('priority')
+                    ->options([
+                        'low' => 'Low',
+                        'medium' => 'Medium',
+                        'high' => 'High',
+                    ])
                     ->required(),
                 Forms\Components\DatePicker::make('due_date')
                     ->required(),
@@ -99,5 +118,40 @@ class TaskResource extends Resource
             'create' => Pages\CreateTask::route('/create'),
             'edit' => Pages\EditTask::route('/{record}/edit'),
         ];
+    }
+
+    protected static function getServiceFieldsSchema(?int $serviceId): array
+    {
+        if (!$serviceId) {
+            return [];
+        }
+
+        $fields = ServiceField::where('service_id', $serviceId)->get();
+
+        return $fields->map(function ($field) {
+            switch ($field->field_type) {
+                case 'text':
+                    return Forms\Components\TextInput::make($field->id)
+                        ->label($field->field_name)
+                        ->required($field->is_required);
+                case 'textarea':
+                    return Forms\Components\Textarea::make($field->id)
+                        ->label($field->field_name)
+                        ->required($field->is_required);
+                case 'select':
+                    return Forms\Components\Select::make($field->id)
+                        ->label($field->field_name)
+                        ->options(collect($field->field_options)->toArray())
+                        ->required($field->is_required);
+                case 'checkbox':
+                    return Forms\Components\Checkbox::make($field->id)
+                        ->label($field->field_name)
+                        ->required($field->is_required);
+                default:
+                    return Forms\Components\TextInput::make($field->id)
+                        ->label($field->field_name)
+                        ->required($field->is_required);
+            }
+        })->toArray();
     }
 }
