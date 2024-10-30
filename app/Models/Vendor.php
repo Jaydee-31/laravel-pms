@@ -2,9 +2,18 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Relations\Pivot;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 
-class Vendor extends Pivot
+class Vendor extends Model
 {
-    //
+    protected $fillable = [
+        'name',
+        'contact_info',
+    ];
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class);
+    }
 }
